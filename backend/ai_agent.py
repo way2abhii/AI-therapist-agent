@@ -1,4 +1,4 @@
-from langchain.agents import tool
+from langchain_core.tools import tool
 from tools import query_medgemma, call_emergency
 
 @tool
@@ -41,13 +41,18 @@ def find_nearby_therapists_by_location(location: str) -> str:
 
 
 # Step1: Create an AI Agent & Link to backend
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
-from config import OPENAI_API_KEY
+# pyrefly: ignore [missing-import]
+from config import GROQ_API_KEY
 
 
 tools = [ask_mental_health_specialist, emergency_call_tool, find_nearby_therapists_by_location]
-llm = ChatOpenAI(model="gpt-4", temperature=0.2, api_key=OPENAI_API_KEY)
+llm = ChatGroq(
+    model="openai/gpt-oss-120b",
+    temperature=0.2,
+    api_key=GROQ_API_KEY
+)
 graph = create_react_agent(llm, tools=tools)
 
 SYSTEM_PROMPT = """
@@ -55,7 +60,7 @@ You are an AI engine supporting mental health conversations with warmth and vigi
 You have access to three tools:
 
 1. `ask_mental_health_specialist`: Use this tool to answer all emotional or psychological queries with therapeutic guidance.
-2. `locate_therapist_tool`: Use this tool if the user asks about nearby therapists or if recommending local professional help would be beneficial.
+2. `find_nearby_therapists_by_location`: Use this tool if the user asks about nearby therapists or if recommending local professional help would be beneficial.
 3. `emergency_call_tool`: Use this immediately if the user expresses suicidal thoughts, self-harm intentions, or is in crisis.
 
 Always take necessary action. Respond kindly, clearly, and supportively.
